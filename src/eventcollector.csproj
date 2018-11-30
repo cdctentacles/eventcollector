@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="EventCollector.cs" />
+    <Compile Include="IEventCollector.cs" />
+    <Compile Include="IHealthStore.cs" />
+    <Compile Include="ISource.cs" />
+    <Compile Include="ITarget.cs" />
+    <Compile Include="ITransactionalLog.cs" />
+    <Compile Include="SlidingWindowQueue.cs" />
+    <Compile Include="Source.cs" />
+  </ItemGroup>
+</Project>
