@@ -10,7 +10,7 @@
     <Compile Include="IEventCollector.cs" />
     <Compile Include="IHealthStore.cs" />
     <Compile Include="ISource.cs" />
-    <Compile Include="ITarget.cs" />
+    <Compile Include="IPersistentCollector.cs" />
     <Compile Include="ITransactionalLog.cs" />
     <Compile Include="SlidingWindowQueue.cs" />
     <Compile Include="Source.cs" />

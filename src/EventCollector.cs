@@ -7,7 +7,7 @@ namespace CDC.EventCollector
         EventCollector()
         {
             this.queue = new SlidingWindowQueue();
-            this.targets = new List<ITarget>();
+            this.targets = new List<IPersistentCollector>();
         }
 
         public void TransactionApplied(long lsn, byte [] transaction)
@@ -16,6 +16,6 @@ namespace CDC.EventCollector
         }
 
         private SlidingWindowQueue queue;
-        private List<ITarget> targets;
+        private List<IPersistentCollector> targets;
     }
 }
