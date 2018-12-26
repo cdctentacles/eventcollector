@@ -1,10 +1,12 @@
-﻿namespace CDC.EventCollector
+﻿using System;
+
+namespace CDC.EventCollector
 {
     public interface IHealthStore
     {
-        void WriteError();
-        void WriteWarning();
-        void WriteInfo();
-        void WriteNoise();
+        void WriteError(string msg);
+        void WriteWarning(string msg);
+        void WriteInfo(string msg);
+        void WriteNoise(string msg);
     }
 }
