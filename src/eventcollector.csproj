@@ -6,11 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CDCCollector.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="EventCollector.cs" />
     <Compile Include="IEventCollector.cs" />
     <Compile Include="IHealthStore.cs" />
-    <Compile Include="ISource.cs" />
     <Compile Include="IPersistentCollector.cs" />
+    <Compile Include="ISource.cs" />
+    <Compile Include="ISourceFactory.cs" />
     <Compile Include="ITransactionalLog.cs" />
     <Compile Include="SlidingWindowQueue.cs" />
     <Compile Include="Source.cs" />

@@ -1,7 +1,9 @@
+using System;
+
 namespace CDC.EventCollector
 {
     public interface IEventCollector
     {
-        void TransactionApplied(long lsn, byte [] transaction);
+        void TransactionApplied(Guid partitionId, long lsn, byte [] transaction);
     }
 }

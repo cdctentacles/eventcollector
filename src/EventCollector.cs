@@ -4,7 +4,7 @@ namespace CDC.EventCollector
 {
     class EventCollector
     {
-        EventCollector()
+        public EventCollector()
         {
             this.queue = new SlidingWindowQueue();
             this.targets = new List<IPersistentCollector>();
