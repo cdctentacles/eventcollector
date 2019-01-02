@@ -7,6 +7,7 @@ namespace CDC.EventCollector
     public interface IPersistentCollector
     {
         Task PersistTransactions(List<PartitionChange> changes);
+        Guid GetId();
     }
 
     public class PartitionChange

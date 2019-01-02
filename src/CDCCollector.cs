@@ -8,10 +8,12 @@ namespace CDC.EventCollector
         {
             foreach (var sourceFactory in configuration.SourceFactories)
             {
-
+                sourceFactory.CreateSource(collector, configuration.HealthStore);
             }
+
+            collector.AddPersistentCollectors(configuration.PersistentCollectors);
         }
 
-        static EventCollector collector = new EventCollector();
+        private static EventCollector collector = new EventCollector();
     }
 }

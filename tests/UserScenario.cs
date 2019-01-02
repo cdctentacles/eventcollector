@@ -9,7 +9,7 @@ namespace eventcollector.tests
     public class UserScenario
     {
         [Fact]
-        public void UserScenario1()
+        public void UseOfPublicApi()
         {
             var sourceFactories = new List<ISourceFactory>();
             var persistentCollectors = new List<IPersistentCollector>();
