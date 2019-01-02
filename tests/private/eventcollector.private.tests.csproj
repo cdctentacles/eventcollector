@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="TestHealthStore.cs" />
-    <Compile Include="UserScenario.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\eventcollector.csproj" />
+    <ProjectReference Include="..\..\src\eventcollector.csproj" />
+    <ProjectReference Include="..\common\eventcollector.common.tests.csproj" />
   </ItemGroup>
 </Project>
