@@ -1,5 +1,11 @@
 # Event Collector
 
+Build and run tests before pushing
+```
+powershell ./build_tests.ps1
+```
+
+## Design
 1. Event collector collect events and store in temporary queue.
 2. Producers push events to it.
 3. It pushes events out to target plugin.
