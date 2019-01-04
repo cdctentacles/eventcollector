@@ -7,7 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestEventSource.cs" />
+    <Compile Include="TestEventSourceFactory.cs" />
     <Compile Include="TestHealthStore.cs" />
+    <Compile Include="TestPersistentCollector.cs" />
   </ItemGroup>
 
   <ItemGroup>

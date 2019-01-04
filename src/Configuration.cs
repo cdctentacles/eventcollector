@@ -23,12 +23,12 @@ namespace CDC.EventCollector
 
         public List<ISourceFactory> SourceFactories
         {
-            get { return sourceFactories; }
+            get { return this.sourceFactories; }
         }
 
         public List<IPersistentCollector> PersistentCollectors
         {
-            get { return persistentCollectors; }
+            get { return this.persistentCollectors; }
         }
 
         private List<ISourceFactory> sourceFactories;
