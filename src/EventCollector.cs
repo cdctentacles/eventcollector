@@ -1,7 +1,8 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace CDC.EventCollector
 {
@@ -12,11 +13,13 @@ namespace CDC.EventCollector
             this.queue = new SlidingWindowQueue();
             this.persistentCollector = new List<IPersistentCollector>();
             this.lockObj = new Object();
+            this.scheduler = new EventCollectorScheduler();
         }
 
-        public void TransactionApplied(Guid partitionId, long lsn, byte [] transaction)
+        public Task TransactionApplied(Guid partitionId, long lsn, byte [] transaction)
         {
             queue.Add(lsn, transaction);
+            return Task.CompletedTask; // todo
         }
 
         public void AddPersistentCollectors(IList<IPersistentCollector> newCollectors)
@@ -38,6 +41,7 @@ namespace CDC.EventCollector
 
         private SlidingWindowQueue queue;
         private IList<IPersistentCollector> persistentCollector;
+        private IEventCollectorScheduler scheduler;
         private Object lockObj;
     }
 }

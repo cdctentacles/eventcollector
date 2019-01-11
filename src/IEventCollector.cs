@@ -1,9 +1,10 @@
 using System;
+using System.Threading.Tasks;
 
 namespace CDC.EventCollector
 {
     public interface IEventCollector
     {
-        void TransactionApplied(Guid partitionId, long lsn, byte [] transaction);
+        Task TransactionApplied(Guid partitionId, long lsn, byte [] transaction);
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace CDC.EventCollector
 {
@@ -12,9 +13,9 @@ namespace CDC.EventCollector
         }
 
         // return error type
-        public void OnTransactionApplied(long lsn, byte [] transaction)
+        public async Task OnTransactionApplied(long lsn, byte [] transaction)
         {
-            this.eventCollector.TransactionApplied(GetSourceId(), lsn, transaction);
+            await this.eventCollector.TransactionApplied(GetSourceId(), lsn, transaction);
         }
 
         public abstract ITransactionalLog GetTransactionalLog();

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 using CDC.EventCollector;
 using Xunit;
@@ -19,7 +21,7 @@ namespace eventcollector.tests
         }
 
         [Fact]
-        public void End2EndHappyPath()
+        public async Task End2EndHappyPath()
         {
             // test in progress.
             var testSourceFactory = new TestEventSourceFactory();
@@ -31,6 +33,9 @@ namespace eventcollector.tests
             Assert.Null(testSourceFactory.EventSource);
             CDCCollector.AddConfiguration(conf);
             Assert.NotNull(testSourceFactory.EventSource);
+
+            var eventSource = testSourceFactory.EventSource;
+            await eventSource.OnTransactionApplied(1, Encoding.ASCII.GetBytes("{}"));
         }
     }
 }
