@@ -14,12 +14,23 @@ namespace CDC.EventCollector
             this.persistentCollector = new List<IPersistentCollector>();
             this.lockObj = new Object();
             this.scheduler = new EventCollectorScheduler();
+            this.scheduler.Ready += EventCollector.PersistEvents;
         }
 
         public Task TransactionApplied(Guid partitionId, long lsn, byte [] transaction)
         {
-            queue.Add(lsn, transaction);
-            return Task.CompletedTask; // todo
+            this.queue.Add(lsn, transaction);
+            return this.scheduler.NewEvent();
+        }
+
+        static public async Task PersistEvents(object eventCollector)
+        {
+            await ((EventCollector)eventCollector).PersistEvents();
+        }
+
+        public async Task PersistEvents()
+        {
+            await Task.CompletedTask;
         }
 
         public void AddPersistentCollectors(IList<IPersistentCollector> newCollectors)
@@ -41,7 +52,7 @@ namespace CDC.EventCollector
 
         private SlidingWindowQueue queue;
         private IList<IPersistentCollector> persistentCollector;
-        private IEventCollectorScheduler scheduler;
+        private EventCollectorScheduler scheduler;
         private Object lockObj;
     }
 }
