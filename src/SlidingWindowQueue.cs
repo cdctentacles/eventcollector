@@ -27,7 +27,7 @@ namespace CDC.EventCollector
 
         public List<TransactionData> GetTransactions(long lsn)
         {
-            return this.queue;
+            return new List<TransactionData>(this.queue);
         }
 
         private long lsnSeen;

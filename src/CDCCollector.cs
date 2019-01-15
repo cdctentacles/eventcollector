@@ -6,6 +6,17 @@ namespace CDC.EventCollector
     {
         public static void AddConfiguration(Configuration configuration)
         {
+            AddConfigurationToCollector(CDCCollector.collector, configuration);
+        }
+
+        public static void NewCollectorConfiguration(Configuration configuration)
+        {
+            var collector = new EventCollector();
+            AddConfigurationToCollector(collector, configuration);
+        }
+
+        private static void AddConfigurationToCollector(EventCollector collector, Configuration configuration)
+        {
             foreach (var sourceFactory in configuration.SourceFactories)
             {
                 sourceFactory.CreateSource(collector, configuration.HealthStore);

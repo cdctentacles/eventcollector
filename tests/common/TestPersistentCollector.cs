@@ -27,7 +27,7 @@ namespace eventcollector.tests
 
         public List<PartitionChange> Changes
         {
-            get { return this.changes; }
+            get { return new List<PartitionChange>(this.changes); }
         }
 
         List<PartitionChange> changes;

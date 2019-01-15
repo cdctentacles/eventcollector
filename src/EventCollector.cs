@@ -28,10 +28,12 @@ namespace CDC.EventCollector
             var transactions = this.queue.GetTransactions(persistTillLsn);
             var partitionChange = new PartitionChange(new Guid(), transactions);
             var partitionChanges = new List<PartitionChange> { partitionChange };
+
             foreach (var persistentCollector in this.persistentCollectors)
             {
                 await persistentCollector.PersistTransactions(partitionChanges);
             }
+
             this.queue.SlidWindowTill(persistTillLsn);
         }
 
