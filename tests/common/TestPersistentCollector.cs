@@ -11,10 +11,12 @@ namespace eventcollector.tests
         public TestPersistentCollector()
         {
             this.Id = new Guid();
+            this.changes = new List<PartitionChange>();
         }
 
         public Task PersistTransactions(List<PartitionChange> changes)
         {
+            this.changes.AddRange(changes);
             return Task.CompletedTask;
         }
 
@@ -23,6 +25,12 @@ namespace eventcollector.tests
             return this.Id;
         }
 
+        public List<PartitionChange> Changes
+        {
+            get { return this.changes; }
+        }
+
+        List<PartitionChange> changes;
         Guid Id;
     }
 }

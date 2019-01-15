@@ -23,10 +23,10 @@ namespace eventcollector.tests
         [Fact]
         public async Task End2EndHappyPath()
         {
-            // test in progress.
             var testSourceFactory = new TestEventSourceFactory();
             var sourceFactories = new List<ISourceFactory>{ testSourceFactory };
-            var persistentCollectors = new List<IPersistentCollector>() { new TestPersistentCollector() };
+            var persistentCollector = new TestPersistentCollector();
+            var persistentCollectors = new List<IPersistentCollector>() { persistentCollector };
             var conf = new Configuration(sourceFactories, persistentCollectors)
                 .SetHealthStore(new TestHealthStore());
 
@@ -35,7 +35,17 @@ namespace eventcollector.tests
             Assert.NotNull(testSourceFactory.EventSource);
 
             var eventSource = testSourceFactory.EventSource;
-            await eventSource.OnTransactionApplied(1, Encoding.ASCII.GetBytes("{}"));
+            var transactionBytes = Encoding.ASCII.GetBytes("{}");
+            var transactionLSN = 1;
+            await eventSource.OnTransactionApplied(transactionLSN, transactionBytes);
+
+            Assert.Single(persistentCollector.Changes);
+            var persistedEvent = persistentCollector.Changes[0];
+            Assert.Equal(eventSource.GetSourceId(), persistedEvent.PartitionId);
+            Assert.Single(persistedEvent.Transactions);
+            var persistedTransaction = persistedEvent.Transactions[0];
+            Assert.Equal(transactionLSN, persistedTransaction.Lsn);
+            Assert.Equal(transactionBytes, persistedTransaction.Data);
         }
     }
 }

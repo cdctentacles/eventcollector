@@ -20,5 +20,7 @@
     <Compile Include="ITransactionalLog.cs" />
     <Compile Include="SlidingWindowQueue.cs" />
     <Compile Include="Source.cs" />
+    <Compile Include="TransactionData.cs" />
+    <Compile Include="PartitionChange.cs" />
   </ItemGroup>
 </Project>

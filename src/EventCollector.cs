@@ -11,26 +11,28 @@ namespace CDC.EventCollector
         public EventCollector()
         {
             this.queue = new SlidingWindowQueue();
-            this.persistentCollector = new List<IPersistentCollector>();
+            this.persistentCollectors = new List<IPersistentCollector>();
             this.lockObj = new Object();
             this.scheduler = new EventCollectorScheduler();
-            this.scheduler.Ready += EventCollector.PersistEvents;
+            this.scheduler.Ready += this.PersistEvents;
         }
 
         public Task TransactionApplied(Guid partitionId, long lsn, byte [] transaction)
         {
             this.queue.Add(lsn, transaction);
-            return this.scheduler.NewEvent();
+            return this.scheduler.NewEvent(lsn);
         }
 
-        static public async Task PersistEvents(object eventCollector)
+        public async Task PersistEvents(long persistTillLsn)
         {
-            await ((EventCollector)eventCollector).PersistEvents();
-        }
-
-        public async Task PersistEvents()
-        {
-            await Task.CompletedTask;
+            var transactions = this.queue.GetTransactions(persistTillLsn);
+            var partitionChange = new PartitionChange(new Guid(), transactions);
+            var partitionChanges = new List<PartitionChange> { partitionChange };
+            foreach (var persistentCollector in this.persistentCollectors)
+            {
+                await persistentCollector.PersistTransactions(partitionChanges);
+            }
+            this.queue.SlidWindowTill(persistTillLsn);
         }
 
         public void AddPersistentCollectors(IList<IPersistentCollector> newCollectors)
@@ -40,18 +42,18 @@ namespace CDC.EventCollector
                 var unregisteredCollectors = newCollectors.Where(nc => !IsRegisteredCollector(nc));
                 foreach (var collector in unregisteredCollectors)
                 {
-                    this.persistentCollector.Add(collector);
+                    this.persistentCollectors.Add(collector);
                 }
             }
         }
 
         private bool IsRegisteredCollector(IPersistentCollector collector)
         {
-            return this.persistentCollector.Any(c => c.GetId() == collector.GetId());
+            return this.persistentCollectors.Any(c => c.GetId() == collector.GetId());
         }
 
         private SlidingWindowQueue queue;
-        private IList<IPersistentCollector> persistentCollector;
+        private IList<IPersistentCollector> persistentCollectors;
         private EventCollectorScheduler scheduler;
         private Object lockObj;
     }

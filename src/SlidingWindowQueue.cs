@@ -1,30 +1,36 @@
+using System.Collections.Generic;
+
 namespace CDC.EventCollector
 {
     class SlidingWindowQueue
     {
         public SlidingWindowQueue()
         {
-            this.lsnInWaiting = 0;
+            this.queue = new List<TransactionData>();
+            this.lsnSeen = 0;
         }
 
         public void Add(long lsn, byte [] data)
         {
-            if (lsn == this.lsnInWaiting)
-            {
-                this.lsnInWaiting += 1;
-            }
+            this.queue.Add(new TransactionData(lsn, data));
         }
 
         public int Length()
         {
-            return 0;
+            return this.queue.Count;
         }
 
         public void SlidWindowTill(long lsn)
         {
-
+            this.lsnSeen = lsn;
         }
 
-        private long lsnInWaiting;
+        public List<TransactionData> GetTransactions(long lsn)
+        {
+            return this.queue;
+        }
+
+        private long lsnSeen;
+        List<TransactionData> queue;
     }
 }

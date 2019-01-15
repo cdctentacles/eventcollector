@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CDC.EventCollector
@@ -7,13 +8,14 @@ namespace CDC.EventCollector
     {
         public EventCollectorScheduler()
         {
-            var source = new TaskCompletionSource<bool>();
-            this.waitingTask = source.Task;
+            this.source = new TaskCompletionSource<bool>();
+            this.waitingTillId = 0;
+            this.timer = new Timer(this.OnEvent, null, TimeSpan.Zero, Timeout.InfiniteTimeSpan);
         }
 
-        public event Func<object, Task> Ready;
+        public event Func<long, Task> Ready;
 
-        public async Task OnEvent()
+        public async void OnEvent(object state)
         {
             var handlers = Ready;
             if (null == handlers)
@@ -24,20 +26,29 @@ namespace CDC.EventCollector
             Delegate[] invocationList = handlers.GetInvocationList();
             Task[] handlerTasks = new Task[invocationList.Length];
 
+            // todo: handle multi threaded ness of changing waitingTillId.
             for (int i = 0; i < invocationList.Length; i++)
             {
-                handlerTasks[i] = ((Func<object, EventArgs, Task>)invocationList[i])(this, EventArgs.Empty);
+                // todo : don't cast here . just a typedef
+                handlerTasks[i] = ((Func<long, Task>)invocationList[i])(this.waitingTillId);
             }
 
             await Task.WhenAll(handlerTasks);
+            this.source.SetResult(true);
+            this.source = new TaskCompletionSource<bool>();
+
+            // call the OnEvent again.
+            this.timer.Change(TimeSpan.FromMilliseconds(20), Timeout.InfiniteTimeSpan);
         }
 
-        public Task NewEvent()
+        public Task NewEvent(long id)
         {
-            // return waiting task
-            return Task.CompletedTask;
+            this.waitingTillId = id;
+            return this.source.Task;
         }
 
-        private Task waitingTask;
+        TaskCompletionSource<bool> source;
+        private long waitingTillId;
+        Timer timer;
     }
 }
