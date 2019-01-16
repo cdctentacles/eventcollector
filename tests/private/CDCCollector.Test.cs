@@ -14,10 +14,9 @@ namespace eventcollector.tests
         public void SetupOfSourceAndPersistentCollector()
         {
             var testSourceFactory = new TestEventSourceFactory();
-            var sourceFactories = new List<ISourceFactory>{ testSourceFactory };
             var persistentCollector = new TestPersistentCollector();
             var persistentCollectors = new List<IPersistentCollector>() { persistentCollector };
-            var conf = new Configuration(sourceFactories, persistentCollectors)
+            var conf = new Configuration(testSourceFactory, persistentCollectors)
                 .SetHealthStore(new TestHealthStore());
 
             Assert.Null(testSourceFactory.EventSource);

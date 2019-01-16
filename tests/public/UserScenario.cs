@@ -13,9 +13,8 @@ namespace eventcollector.tests
         [Fact]
         public void ShowUseOfPublicApi()
         {
-            var sourceFactories = new List<ISourceFactory>();
             var persistentCollectors = new List<IPersistentCollector>();
-            var conf = new Configuration(sourceFactories, persistentCollectors)
+            var conf = new Configuration(new TestEventSourceFactory(), persistentCollectors)
                 .SetHealthStore(new TestHealthStore());
             CDCCollector.AddConfiguration(conf);
         }
@@ -24,10 +23,9 @@ namespace eventcollector.tests
         public async Task End2EndHappyPath()
         {
             var testSourceFactory = new TestEventSourceFactory();
-            var sourceFactories = new List<ISourceFactory>{ testSourceFactory };
             var persistentCollector = new TestPersistentCollector();
             var persistentCollectors = new List<IPersistentCollector>() { persistentCollector };
-            var conf = new Configuration(sourceFactories, persistentCollectors)
+            var conf = new Configuration(testSourceFactory, persistentCollectors)
                 .SetHealthStore(new TestHealthStore());
 
             Assert.Null(testSourceFactory.EventSource);
@@ -52,10 +50,9 @@ namespace eventcollector.tests
         public void MultiTransactionsEnd2End()
         {
             var testSourceFactory = new TestEventSourceFactory();
-            var sourceFactories = new List<ISourceFactory>{ testSourceFactory };
             var persistentCollector = new TestPersistentCollector();
             var persistentCollectors = new List<IPersistentCollector>() { persistentCollector };
-            var conf = new Configuration(sourceFactories, persistentCollectors)
+            var conf = new Configuration(testSourceFactory, persistentCollectors)
                 .SetHealthStore(new TestHealthStore());
 
             Assert.Null(testSourceFactory.EventSource);

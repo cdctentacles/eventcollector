@@ -4,9 +4,9 @@ namespace CDC.EventCollector
 {
     public class Configuration
     {
-        public Configuration(List<ISourceFactory> sourceFactories, List<IPersistentCollector> collectors)
+        public Configuration(ISourceFactory sourceFactory, List<IPersistentCollector> collectors)
         {
-            this.sourceFactories = sourceFactories;
+            this.sourceFactory = sourceFactory;
             this.persistentCollectors = collectors;
         }
 
@@ -21,9 +21,9 @@ namespace CDC.EventCollector
             get { return this.healthStore; }
         }
 
-        public List<ISourceFactory> SourceFactories
+        public ISourceFactory SourceFactory
         {
-            get { return this.sourceFactories; }
+            get { return this.sourceFactory; }
         }
 
         public List<IPersistentCollector> PersistentCollectors
@@ -31,7 +31,7 @@ namespace CDC.EventCollector
             get { return this.persistentCollectors; }
         }
 
-        private List<ISourceFactory> sourceFactories;
+        private ISourceFactory sourceFactory;
         private List<IPersistentCollector> persistentCollectors;
         private IHealthStore healthStore;
     }

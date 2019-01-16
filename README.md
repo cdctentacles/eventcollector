@@ -27,6 +27,7 @@ Think about APIs :
     https://github.com/OmniSharp/omnisharp-vscode/wiki/How-to-run-and-debug-unit-tests
 
 ## Todo:
+* Done : Have only one source in EventCollector.
 * Write few basic private test for each class.
 * Make multi threaded implementation test.
 * Pass multi threaded implementation.

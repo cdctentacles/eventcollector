@@ -17,11 +17,7 @@ namespace CDC.EventCollector
 
         private static void AddConfigurationToCollector(EventCollector collector, Configuration configuration)
         {
-            foreach (var sourceFactory in configuration.SourceFactories)
-            {
-                sourceFactory.CreateSource(collector, configuration.HealthStore);
-            }
-
+            configuration.SourceFactory.CreateSource(collector, configuration.HealthStore);
             collector.AddPersistentCollectors(configuration.PersistentCollectors);
         }
 
