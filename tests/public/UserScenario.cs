@@ -16,7 +16,7 @@ namespace eventcollector.tests
             var persistentCollectors = new List<IPersistentCollector>();
             var conf = new Configuration(new TestEventSourceFactory(), persistentCollectors)
                 .SetHealthStore(new TestHealthStore());
-            CDCCollector.AddConfiguration(conf);
+            CDCCollector.NewCollectorConfiguration(conf);
         }
 
         [Fact]

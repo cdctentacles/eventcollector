@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <Compile Include="CDCCollector.Test.cs" />
+    <Compile Include="EventCollector.Test.cs" />
+    <Compile Include="EventCollectorScheduler.Test.cs" />
+    <Compile Include="SlidingWindowQueue.Test.cs" />
   </ItemGroup>
 
   <ItemGroup>
