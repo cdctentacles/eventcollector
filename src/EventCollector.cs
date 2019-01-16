@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CDC.EventCollector
 {
-    class EventCollector : IEventCollector
+    internal class EventCollector : IEventCollector
     {
         public EventCollector()
         {
@@ -37,7 +37,7 @@ namespace CDC.EventCollector
             this.queue.SlidWindowTill(persistTillLsn);
         }
 
-        public void AddPersistentCollectors(IList<IPersistentCollector> newCollectors)
+        public int AddPersistentCollectors(IList<IPersistentCollector> newCollectors)
         {
             lock(lockObj)
             {
@@ -46,10 +46,11 @@ namespace CDC.EventCollector
                 {
                     this.persistentCollectors.Add(collector);
                 }
+                return unregisteredCollectors.Count();
             }
         }
 
-        private bool IsRegisteredCollector(IPersistentCollector collector)
+        internal bool IsRegisteredCollector(IPersistentCollector collector)
         {
             return this.persistentCollectors.Any(c => c.GetId() == collector.GetId());
         }

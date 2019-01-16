@@ -10,6 +10,7 @@ namespace eventcollector.tests
         base(collector, healthStore)
         {
             this.Id = new Guid();
+            this.collector = collector;
         }
 
         public override Guid GetSourceId()
@@ -22,6 +23,12 @@ namespace eventcollector.tests
             return null;
         }
 
+        public IEventCollector Collector
+        {
+            get { return this.collector; }
+        }
+
         Guid Id;
+        private IEventCollector collector;
     }
 }

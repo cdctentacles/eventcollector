@@ -16,11 +16,11 @@ namespace eventcollector.tests
             return this.testEventSource;
         }
 
-        public Source EventSource
+        public TestEventSource EventSource
         {
             get { return this.testEventSource; }
         }
 
-        private Source testEventSource;
+        private TestEventSource testEventSource;
     }
 }
