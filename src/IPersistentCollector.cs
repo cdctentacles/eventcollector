@@ -1,12 +1,12 @@
 using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CDC.EventCollector
 {
     public interface IPersistentCollector
     {
-        Task PersistTransactions(List<PartitionChange> changes);
+        Task PersistTransactions(PartitionChange change);
         Guid GetId();
     }
 }

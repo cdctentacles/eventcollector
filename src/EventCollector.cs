@@ -25,13 +25,12 @@ namespace CDC.EventCollector
 
         public async Task PersistEvents(long persistTillLsn)
         {
-            var transactions = this.queue.GetTransactions(persistTillLsn);
+            var transactions = this.queue.GetTransactions(persistTillLsn).AsReadOnly();
             var partitionChange = new PartitionChange(new Guid(), transactions);
-            var partitionChanges = new List<PartitionChange> { partitionChange };
 
             foreach (var persistentCollector in this.persistentCollectors)
             {
-                await persistentCollector.PersistTransactions(partitionChanges);
+                await persistentCollector.PersistTransactions(partitionChange);
             }
 
             this.queue.SlidWindowTill(persistTillLsn);

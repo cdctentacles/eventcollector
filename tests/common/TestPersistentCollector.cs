@@ -14,9 +14,9 @@ namespace eventcollector.tests
             this.changes = new List<PartitionChange>();
         }
 
-        public Task PersistTransactions(List<PartitionChange> changes)
+        public Task PersistTransactions(PartitionChange change)
         {
-            this.changes.AddRange(changes);
+            this.changes.Add(change);
             return Task.CompletedTask;
         }
 

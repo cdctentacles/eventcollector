@@ -1,15 +1,16 @@
 using System;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CDC.EventCollector
 {
     public class PartitionChange
     {
         public readonly Guid PartitionId;
-        public readonly List<TransactionData> Transactions;
+        public readonly ReadOnlyCollection<TransactionData> Transactions;
 
-        public PartitionChange(Guid partitionId, List<TransactionData> transactions)
+        public PartitionChange(Guid partitionId, ReadOnlyCollection<TransactionData> transactions)
         {
             this.PartitionId = partitionId;
             this.Transactions = transactions;
