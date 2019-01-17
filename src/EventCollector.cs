@@ -8,10 +8,10 @@ namespace CDC.EventCollector
 {
     internal class EventCollector : IEventCollector
     {
-        public EventCollector()
+        public EventCollector(List<IPersistentCollector> persistentCollectors)
         {
             this.queue = new SlidingWindowQueue();
-            this.persistentCollectors = new List<IPersistentCollector>();
+            this.persistentCollectors = persistentCollectors;
             this.lockObj = new Object();
             this.scheduler = new EventCollectorScheduler();
             this.scheduler.Ready += this.PersistEvents;
@@ -36,17 +36,14 @@ namespace CDC.EventCollector
             this.queue.SlidWindowTill(persistTillLsn);
         }
 
-        public int AddPersistentCollectors(IList<IPersistentCollector> newCollectors)
+        private int AddPersistentCollectors(IList<IPersistentCollector> newCollectors)
         {
-            lock(lockObj)
+            var unregisteredCollectors = newCollectors.Where(nc => !IsRegisteredCollector(nc));
+            foreach (var collector in unregisteredCollectors)
             {
-                var unregisteredCollectors = newCollectors.Where(nc => !IsRegisteredCollector(nc));
-                foreach (var collector in unregisteredCollectors)
-                {
-                    this.persistentCollectors.Add(collector);
-                }
-                return unregisteredCollectors.Count();
+                this.persistentCollectors.Add(collector);
             }
+            return unregisteredCollectors.Count();
         }
 
         internal bool IsRegisteredCollector(IPersistentCollector collector)

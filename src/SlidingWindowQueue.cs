@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace CDC.EventCollector
 {
-    class SlidingWindowQueue
+    internal class SlidingWindowQueue
     {
         public SlidingWindowQueue()
         {

@@ -6,14 +6,8 @@ namespace CDC.EventCollector
     {
         public static void NewCollectorConfiguration(Configuration configuration)
         {
-            var collector = new EventCollector();
-            AddConfigurationToCollector(collector, configuration);
-        }
-
-        private static void AddConfigurationToCollector(EventCollector collector, Configuration configuration)
-        {
+            var collector = new EventCollector(configuration.PersistentCollectors);
             configuration.SourceFactory.CreateSource(collector, configuration.HealthStore);
-            collector.AddPersistentCollectors(configuration.PersistentCollectors);
         }
     }
 }

@@ -13,27 +13,13 @@ namespace CDC.EventCollector
             this.timer = new Timer(this.OnEvent, null, TimeSpan.Zero, Timeout.InfiniteTimeSpan);
         }
 
-        public event Func<long, Task> Ready;
+        public Func<long, Task> Ready;
 
         public async void OnEvent(object state)
         {
-            var handlers = Ready;
-            if (null == handlers)
-            {
-                return;
-            }
-
-            Delegate[] invocationList = handlers.GetInvocationList();
-            Task[] handlerTasks = new Task[invocationList.Length];
-
             // todo: handle multi threaded ness of changing waitingTillId.
-            for (int i = 0; i < invocationList.Length; i++)
-            {
-                // todo : don't cast here . just a typedef
-                handlerTasks[i] = ((Func<long, Task>)invocationList[i])(this.waitingTillId);
-            }
+            await Ready(this.waitingTillId);
 
-            await Task.WhenAll(handlerTasks);
             this.source.SetResult(true);
             this.source = new TaskCompletionSource<bool>();
 
