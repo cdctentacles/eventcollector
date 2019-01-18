@@ -11,8 +11,8 @@
             ],
             "problemMatcher": "$msCompile",
             "group": {
-                "kind": "build",
-                "isDefault": true
+                "kind": "build"
+                , "isDefault": true
             }
         },
         {
@@ -21,9 +21,16 @@
             "type": "process",
             "args": [
                 "test",
+                // this does not work with xunit.
+                // "--logger",
+                // "\"console;verbosity=detailed\"",
                 "${workspaceFolder}/tests/private/eventcollector.private.tests.csproj"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test"
+                , "isDefault": true
+            }
         },
         {
             "label": "public test",
@@ -33,7 +40,11 @@
                 "test",
                 "${workspaceFolder}/tests/public/eventcollector.public.tests.csproj"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test"
+                , "isDefault": true
+            }
         }
     ]
 }

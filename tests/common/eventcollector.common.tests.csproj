@@ -11,9 +11,11 @@
     <Compile Include="TestEventSourceFactory.cs" />
     <Compile Include="TestHealthStore.cs" />
     <Compile Include="TestPersistentCollector.cs" />
+    <Compile Include="XunitConsoleWriter.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\eventcollector.csproj" />
+    <PackageReference Include="xunit" Version="2.3.1" />
   </ItemGroup>
 </Project>

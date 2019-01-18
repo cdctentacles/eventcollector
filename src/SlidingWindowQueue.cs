@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CDC.EventCollector
 {
@@ -6,31 +9,68 @@ namespace CDC.EventCollector
     {
         public SlidingWindowQueue()
         {
-            this.queue = new List<TransactionData>();
-            this.lsnSeen = 0;
+            this.queue = new ConcurrentQueue<TransactionData>();
+            this.lsnSeen = long.MinValue;
         }
 
         public void Add(long lsn, byte [] data)
         {
-            this.queue.Add(new TransactionData(lsn, data));
-        }
-
-        public int Length()
-        {
-            return this.queue.Count;
-        }
-
-        public void SlidWindowTill(long lsn)
-        {
+            if (this.lsnSeen >= lsn)
+            {
+                throw new ArgumentException($"LSN not in order. Received {lsn} when we have seen {this.lsnSeen}");
+            }
+            this.queue.Enqueue(new TransactionData(lsn, data));
             this.lsnSeen = lsn;
         }
 
-        public List<TransactionData> GetTransactions(long lsn)
+        public int SlideWindowTill(long lsn)
         {
-            return new List<TransactionData>(this.queue);
+            int totalTansactions = 0;
+
+            while (!this.queue.IsEmpty)
+            {
+                TransactionData peekTransaction = null;
+                if (this.queue.TryPeek(out peekTransaction))
+                {
+                    if (peekTransaction.Lsn > lsn)
+                    {
+                        break;
+                    }
+
+                    TransactionData dequeueTransaction = null;
+                    if (this.queue.TryDequeue(out dequeueTransaction))
+                    {
+                        if (!dequeueTransaction.Equals(peekTransaction))
+                        {
+                            throw new Exception("Fatal exception : Removed transaction from queue other than peeked.");
+                        }
+                        else
+                        {
+                            totalTansactions += 1;
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Unexpected exception : Another thread removed from queue while peeked different transaction.");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Unexpected exception : Another thread removed only element from queue after empty check.");
+                }
+            }
+
+            return totalTansactions;
+        }
+
+        public IReadOnlyList<TransactionData> GetTransactions(long lsn)
+        {
+            // Convert to list so that AddTransaction does not change the queue underneath.
+            var queuedTransactions = this.queue.ToList();
+            return queuedTransactions.TakeWhile(transaction => transaction.Lsn <= lsn).ToList().AsReadOnly();
         }
 
         private long lsnSeen;
-        List<TransactionData> queue;
+        ConcurrentQueue<TransactionData> queue;
     }
 }

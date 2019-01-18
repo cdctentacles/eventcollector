@@ -25,7 +25,7 @@ namespace CDC.EventCollector
 
         public async Task PersistEvents(long persistTillLsn)
         {
-            var transactions = this.queue.GetTransactions(persistTillLsn).AsReadOnly();
+            var transactions = this.queue.GetTransactions(persistTillLsn);
             var partitionChange = new PartitionChange(new Guid(), transactions);
 
             foreach (var persistentCollector in this.persistentCollectors)
@@ -33,7 +33,7 @@ namespace CDC.EventCollector
                 await persistentCollector.PersistTransactions(partitionChange);
             }
 
-            this.queue.SlidWindowTill(persistTillLsn);
+            this.queue.SlideWindowTill(persistTillLsn);
         }
 
         private int AddPersistentCollectors(IList<IPersistentCollector> newCollectors)
