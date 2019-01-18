@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,8 +25,8 @@ namespace eventcollector.tests
         public SlidingWindowQueueTest(ITestOutputHelper output)
         {
             // Enable console writing in test by un commenting below.
-            // var converter = new XunitConsoleWriter(output);
-            // Console.SetOut(converter);
+            var converter = new XunitConsoleWriter(output);
+            Console.SetOut(converter);
         }
 
         [Fact]
@@ -64,45 +65,52 @@ namespace eventcollector.tests
         }
 
         [Fact]
+        // case 6
         public void OneAddAndSlideTaskConcurrently()
         {
             var queue = new SlidingWindowQueue();
             long numTotalTransactionsAdded = 0;
             long numTotalTransactionsRemoved = 0;
+            const int MaxTimeToWaitInMs = 1000 * 20; // 20 seconds of test
 
             var addTask = Task.Run(async () => {
                 var rand = new Random();
-                var totalTimeInMs = 0;
-                while (totalTimeInMs < 200)
+                var watch = Stopwatch.StartNew();
+                while (watch.ElapsedMilliseconds < MaxTimeToWaitInMs)
                 {
                     long numTransactionsAddedLocal = Interlocked.Read(ref numTotalTransactionsAdded);
-                    int transactionsAdded = 100;
+                    int transactionsAdded = rand.Next(100, 1000);
                     for (int i = 1; i <= transactionsAdded; ++i)
                     {
                         queue.Add(numTransactionsAddedLocal + i, this.Data);
+                        Interlocked.Exchange(ref numTotalTransactionsAdded,
+                            numTransactionsAddedLocal + i);
                     }
 
-                    Console.WriteLine($"Added total : {numTransactionsAddedLocal + transactionsAdded}");
+                    // Console.WriteLine($"Added total : {numTransactionsAddedLocal + transactionsAdded}");
                     Interlocked.Exchange(ref numTotalTransactionsAdded,
                         numTransactionsAddedLocal + transactionsAdded);
 
-                    var sleepTime = rand.Next(1, 10);
-                    await Task.Delay(sleepTime);
-                    totalTimeInMs += sleepTime;
+                    await Task.Delay(rand.Next(1, 10));
                 }
             });
 
             var slideTask = Task.Run(async () => {
                 var rand = new Random();
-                var totalTimeInMs = 0;
-                while (totalTimeInMs < 200)
+                var watch = Stopwatch.StartNew();
+                while (watch.ElapsedMilliseconds < MaxTimeToWaitInMs)
                 {
+                    if (addTask.IsCompleted)
+                    {
+                        break;
+                    }
+
                     long numTransactionsAddedLocal = Interlocked.Read(ref numTotalTransactionsAdded);
                     var transactions = queue.GetTransactions(numTransactionsAddedLocal);
                     int numRemovedTransactions = queue.SlideWindowTill(numTransactionsAddedLocal);
                     numTotalTransactionsRemoved += numRemovedTransactions;
 
-                    Console.WriteLine($"Removed total : {numTotalTransactionsRemoved}");
+                    // Console.WriteLine($"Removed total : {numTotalTransactionsRemoved}");
                     Assert.True(transactions.Count == numRemovedTransactions,
                         $"{transactions.Count} == {numRemovedTransactions} : " +
                         $"No more transactions can be added with lsn less than {numTransactionsAddedLocal}");
@@ -116,14 +124,26 @@ namespace eventcollector.tests
                         Assert.Equal(this.Data, transaction.Data);
                     }
 
-                    var sleepTime = rand.Next(1, 10);
-                    await Task.Delay(sleepTime);
-                    totalTimeInMs += sleepTime;
+                    await Task.Delay(rand.Next(1, 10));
                 }
             });
 
             Task.WaitAll(new Task[]{ addTask, slideTask });
+            Console.WriteLine($"Added : {numTotalTransactionsAdded} Removed: {numTotalTransactionsRemoved}");
             Assert.True(numTotalTransactionsAdded >= numTotalTransactionsRemoved, "Not possible : Removed more transactions than added.");
+            Assert.True(queue.SlideWindowTill(numTotalTransactionsAdded + 1) == (numTotalTransactionsAdded - numTotalTransactionsRemoved));
+        }
+
+
+        [Fact]
+        public void QueueSemantics()
+        {
+            var queue = new SlidingWindowQueue();
+            queue.Add(0, this.Data);
+            Assert.ThrowsAny<ArgumentException>(() => queue.Add(0, this.Data));
+            Assert.ThrowsAny<ArgumentException>(() => queue.Add(-1, this.Data));
+            queue.Add(1, this.Data);
+            Assert.ThrowsAny<ArgumentException>(() => queue.Add(0, this.Data));
         }
 
         private SlidingWindowQueue GenerateQueueWithData(int numTransactions)

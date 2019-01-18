@@ -21,12 +21,12 @@ popd
 
 Write-Host "Running public apis tests"
 pushd tests\public
-Exec { dotnet test }
+Exec { dotnet test --logger:"console;verbosity=detailed" }
 popd
 
 Write-Host "Running private apis tests"
 pushd tests\private
-Exec { dotnet test }
+Exec { dotnet test --logger:"console;verbosity=detailed" }
 popd
 
 Write-Host "Success!!!"

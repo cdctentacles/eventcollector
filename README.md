@@ -26,6 +26,11 @@ Think about APIs :
     Click on the `Debug Test` over the test name in VSCode.
     https://github.com/OmniSharp/omnisharp-vscode/wiki/How-to-run-and-debug-unit-tests
 
+## Test:
+```cmd
+FOR /L %N IN () DO dotnet test --no-build --filter "FullyQualifiedName~OneAddAndSlideTaskConcurrently" --logger:"console;verbosity=detailed"
+```
+
 ## Todo:
 * Done : Have only one source in EventCollector.
 * Write few basic private test for each class.
