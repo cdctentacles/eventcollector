@@ -83,14 +83,10 @@ namespace eventcollector.tests
                     for (int i = 1; i <= transactionsAdded; ++i)
                     {
                         queue.Add(numTransactionsAddedLocal + i, this.Data);
-                        Interlocked.Exchange(ref numTotalTransactionsAdded,
-                            numTransactionsAddedLocal + i);
+                        Interlocked.Increment(ref numTotalTransactionsAdded);
                     }
 
                     // Console.WriteLine($"Added total : {numTransactionsAddedLocal + transactionsAdded}");
-                    Interlocked.Exchange(ref numTotalTransactionsAdded,
-                        numTransactionsAddedLocal + transactionsAdded);
-
                     await Task.Delay(rand.Next(1, 10));
                 }
             });
@@ -134,6 +130,76 @@ namespace eventcollector.tests
             Assert.True(queue.SlideWindowTill(numTotalTransactionsAdded + 1) == (numTotalTransactionsAdded - numTotalTransactionsRemoved));
         }
 
+
+        [Fact]
+        // We don't support multiple producer or multiple consumer.
+        public void OneProducerMultiConsumerFail()
+        {
+            var queue = new SlidingWindowQueue();
+            long numTotalTransactionsAdded = 0;
+            long numTotalTransactionsRemoved = 0;
+            const int MaxTimeToWaitInMs = 1000 * 20; // 20 seconds of test
+            var rand = new Random();
+
+            Func<Task> runProducer = async () => {
+                var watch = Stopwatch.StartNew();
+                while (watch.ElapsedMilliseconds < MaxTimeToWaitInMs)
+                {
+                    var numTransactions = Interlocked.Read(ref numTotalTransactionsAdded);
+                    int transactionsToAdd = rand.Next(100, 1000);
+                    for (int i = 1; i <= transactionsToAdd; ++i)
+                    {
+                        queue.Add(numTransactions + i, this.Data);
+                    }
+                    Interlocked.Exchange(ref numTotalTransactionsAdded, numTransactions + transactionsToAdd);
+                    await Task.Delay(rand.Next(1, 2));
+                }
+            };
+
+            Func<int, Task> runConsumer = async (int index) => {
+                var watch = Stopwatch.StartNew();
+                while (watch.ElapsedMilliseconds < MaxTimeToWaitInMs)
+                {
+                    var numTransactions = Interlocked.Read(ref numTotalTransactionsAdded);
+                    var transactions = queue.GetTransactions(numTransactions);
+                    var numRemoved = queue.SlideWindowTill(numTransactions);
+                    Assert.True(transactions.Count >= numRemoved);
+                    while (true)
+                    {
+                        var totalRemoved = Interlocked.Read(ref numTotalTransactionsRemoved);
+                        if (totalRemoved == Interlocked.CompareExchange(ref numTotalTransactionsRemoved, totalRemoved + numRemoved, totalRemoved))
+                        {
+                            break;
+                        }
+                    }
+                    await Task.Delay(rand.Next(1, 10));
+                }
+            };
+
+            const int numConsumers = 10;
+            var allTasks = new List<Task>(1 + numConsumers);
+
+            allTasks.Add(runProducer());
+            for (int i = 0; i < numConsumers; ++i)
+            {
+                allTasks.Add(runConsumer(i));
+            }
+
+            try
+            {
+                Task.WaitAll(allTasks.ToArray());
+            }
+            catch (AggregateException ex)
+            {
+                foreach (var e in ex.Flatten().InnerExceptions)
+                {
+                    if (!e.Message.Contains("SlidingWindowQueue :"))
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
 
         [Fact]
         public void QueueSemantics()

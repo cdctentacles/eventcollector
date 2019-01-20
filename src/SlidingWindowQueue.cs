@@ -42,7 +42,7 @@ namespace CDC.EventCollector
                     {
                         if (!dequeueTransaction.Equals(peekTransaction))
                         {
-                            throw new Exception("Fatal exception : Removed transaction from queue other than peeked.");
+                            throw new Exception("SlidingWindowQueue : Fatal exception : Removed transaction from queue other than peeked.");
                         }
                         else
                         {
@@ -51,12 +51,12 @@ namespace CDC.EventCollector
                     }
                     else
                     {
-                        throw new Exception("Unexpected exception : Another thread removed from queue while peeked different transaction.");
+                        throw new Exception("SlidingWindowQueue : Unexpected exception : Another thread removed from queue while peeked different transaction.");
                     }
                 }
                 else
                 {
-                    throw new Exception("Unexpected exception : Another thread removed only element from queue after empty check.");
+                    throw new Exception("SlidingWindowQueue : Unexpected exception : Another thread removed only element from queue after empty check.");
                 }
             }
 
@@ -65,9 +65,7 @@ namespace CDC.EventCollector
 
         public IReadOnlyList<TransactionData> GetTransactions(long lsn)
         {
-            // Convert to list so that AddTransaction does not change the queue underneath.
-            var queuedTransactions = this.queue.ToList();
-            return queuedTransactions.TakeWhile(transaction => transaction.Lsn <= lsn).ToList().AsReadOnly();
+            return this.queue.TakeWhile(transaction => transaction.Lsn <= lsn).ToList().AsReadOnly();
         }
 
         private long lsnSeen;
