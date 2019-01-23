@@ -21,9 +21,9 @@
             "type": "process",
             "args": [
                 "test",
-                // this does not work with xunit.
-                // "--logger",
-                // "\"console;verbosity=detailed\"",
+                // this does not print on console.
+                "--logger",
+                "\"console;verbosity=detailed\"",
                 "${workspaceFolder}/tests/private/eventcollector.private.tests.csproj"
             ],
             "problemMatcher": "$msCompile",

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using CDC.EventCollector;
 using Xunit;
 
+[assembly: CollectionBehavior(MaxParallelThreads = 8)]
+
 namespace eventcollector.tests
 {
     public class CDCCollectorTest

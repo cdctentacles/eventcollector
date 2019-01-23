@@ -13,8 +13,7 @@ namespace CDC.EventCollector
             this.queue = new SlidingWindowQueue();
             this.persistentCollectors = persistentCollectors;
             this.lockObj = new Object();
-            this.scheduler = new EventCollectorScheduler();
-            this.scheduler.Ready += this.PersistEvents;
+            this.scheduler = new EventCollectorScheduler(this.PersistEvents);
         }
 
         public Task TransactionApplied(Guid partitionId, long lsn, byte [] transaction)
