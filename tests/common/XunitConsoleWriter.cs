@@ -17,6 +17,11 @@ namespace eventcollector.tests
         {
             get { return Encoding.UTF8; }
         }
+
+        public override void Write(string message)
+        {
+            _output.WriteLine(message);
+        }
         public override void WriteLine(string message)
         {
             _output.WriteLine(message);

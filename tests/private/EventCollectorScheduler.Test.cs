@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using CDC.EventCollector;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace eventcollector.tests
 {
@@ -21,6 +22,13 @@ namespace eventcollector.tests
     // 4. This all should work during multi threading.
     public class EventCollectorSchedulerTest
     {
+        public EventCollectorSchedulerTest(ITestOutputHelper output)
+        {
+            // Enable console writing in test by un commenting below.
+            var converter = new XunitConsoleWriter(output);
+            Console.SetOut(converter);
+        }
+
         [Fact]
         public void ShouldNotFireMoreThanOneEventAtATime()
         {
@@ -111,6 +119,18 @@ namespace eventcollector.tests
 
         public bool HasReceivedEventAfterFailedEvents()
         {
+            Console.WriteLine("In HasReceivedEventAfterFailedEvents : Failed count {0}, Success count: {1}",
+                this.lsnFailed.Count, this.lsnSucceeded.Count);
+            Console.Write("Failure: ");
+            Console.WriteLine(String.Join(",", this.lsnFailed));
+            Console.Write("Success: ");
+            Console.WriteLine(String.Join(",", this.lsnSucceeded));
+
+            if (this.lsnFailed.Count == 0 && this.lsnSucceeded.Count == 0)
+            {
+                return false;
+            }
+
             if (this.lsnFailed.Count == 0 || this.lsnSucceeded.Count == 0)
             {
                 return true;

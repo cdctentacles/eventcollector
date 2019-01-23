@@ -31,6 +31,8 @@ Think about APIs :
 FOR /L %N IN () DO dotnet test --no-build --filter "FullyQualifiedName~OneAddAndSlideTaskConcurrently" --logger:"console;verbosity=detailed"
 ```
 
+`Console.Write` comes in next line in test output. See `XunitConsoleWriter.cs`.
+
 ## Todo:
 * Done : Have only one source in EventCollector.
 * Write few basic private test for each class.
