@@ -9,7 +9,7 @@ namespace CDC.EventCollector
         public EventCollectorScheduler(Func<long, Task> onSchedule)
         {
             this.source = new TaskCompletionSource<bool>();
-            this.waitingTillId = 0;
+            this.waitingTillId = long.MinValue;
             this.Ready = onSchedule;
             this.timer = new Timer(this.OnEvent, null, TimeSpan.Zero, Timeout.InfiniteTimeSpan);
         }
@@ -45,6 +45,11 @@ namespace CDC.EventCollector
 
         public Task NewEvent(long id)
         {
+            if (id <= this.waitingTillId)
+            {
+                throw new InvalidOperationException("Event ids are monotonically increasing LSN values.");
+            }
+
             this.waitingTillId = id;
             return this.source.Task;
         }

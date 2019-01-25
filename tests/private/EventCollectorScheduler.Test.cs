@@ -30,6 +30,7 @@ namespace eventcollector.tests
         }
 
         [Fact]
+        // case 1
         public void ShouldNotFireMoreThanOneEventAtATime()
         {
             var invariantTester = new SchedulerInVariantTester();
@@ -47,6 +48,7 @@ namespace eventcollector.tests
         }
 
         [Fact]
+        // case 2.a
         public void ShouldNotFireEventAgainForSuccessLsn()
         {
             var invariantTester = new SchedulerInVariantTester();
@@ -64,6 +66,7 @@ namespace eventcollector.tests
         }
 
         [Fact]
+        // case 2.b
         public void ShouldFireEventAgainForFailureLsn()
         {
             var invariantTester = new SchedulerInVariantTester();
@@ -80,6 +83,15 @@ namespace eventcollector.tests
             }
 
             Assert.True(invariantTester.HasReceivedEventAfterFailedEvents());
+        }
+
+        [Fact]
+        public async Task ShouldRejectNewEventWithLsnAlreadySeen()
+        {
+            var invariantTester = new SchedulerInVariantTester();
+            var scheduler = new EventCollectorScheduler(invariantTester.OnSchedule);
+            await scheduler.NewEvent(1);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await scheduler.NewEvent(1));
         }
     }
 
@@ -136,7 +148,8 @@ namespace eventcollector.tests
                 return true;
             }
 
-            // anyLsnInSuccessWithSmallerLsnInFailed
+            // any Lsn in success with smaller lsn in failed ones mean that
+            // we got an event with lsn >= failed_lsn after failed_lsn.
             return this.lsnSucceeded.Any(ls => this.lsnFailed.Any(lf => lf <= ls));
         }
 
