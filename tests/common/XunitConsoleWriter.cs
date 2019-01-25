@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -20,15 +21,38 @@ namespace eventcollector.tests
 
         public override void Write(string message)
         {
-            _output.WriteLine(message);
+            WriteLineXunit(message, null);
         }
         public override void WriteLine(string message)
         {
-            _output.WriteLine(message);
+            WriteLineXunit(message, null);
         }
         public override void WriteLine(string format, params object[] args)
         {
-            _output.WriteLine(format, args);
+            WriteLineXunit(format, args);
+        }
+
+        void WriteLineXunit(string format, params object[] args)
+        {
+            try
+            {
+                if (args == null)
+                {
+                    _output.WriteLine(format);
+                }
+                else
+                {
+                    _output.WriteLine(format, args);
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (!ex.Message.Contains("There is no currently active test"))
+                {
+                    // eat this exception..
+                    throw;
+                }
+            }
         }
     }
 }
