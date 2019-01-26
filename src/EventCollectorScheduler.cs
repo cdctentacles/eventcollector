@@ -20,24 +20,24 @@ namespace CDC.EventCollector
         {
             try
             {
-                if (this.successTillId == this.waitingTillId)
+                if (this.triedTillId == this.waitingTillId)
                 {
                     return;
                 }
 
                 // todo: handle multi threaded ness of changing waitingTillId.
                 await Ready(this.waitingTillId);
-                this.successTillId = this.waitingTillId;
                 this.source.SetResult(true);
-                this.source = new TaskCompletionSource<bool>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // eat all exceptions.
-                // report on IHealthStore.
+                // also report on IHealthStore.
+                this.source.SetException(ex);
             }
             finally
             {
+                this.triedTillId = this.waitingTillId;
+                this.source = new TaskCompletionSource<bool>();
                 // call the OnEvent again.
                 this.timer.Change(TimeSpan.FromMilliseconds(20), Timeout.InfiniteTimeSpan);
             }
@@ -57,7 +57,7 @@ namespace CDC.EventCollector
 
         TaskCompletionSource<bool> source;
         private long waitingTillId;
-        private long successTillId;
+        private long triedTillId;
         Timer timer;
     }
 }

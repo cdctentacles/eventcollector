@@ -19,7 +19,7 @@ namespace eventcollector.tests
     // 3. Should reject new event with lsn less than already seen.
     // 4. If task t1 is returned for l1, then if event for l1 returns success, then t1 should complete.
     //    (b) If task t2 =/= t1 is returned for l2, then on success of l1, t2 should not complete.
-    // 4. This all should work during multi threading.
+    // 5. This all should work during multi threading.
     public class EventCollectorSchedulerTest
     {
         public EventCollectorSchedulerTest(ITestOutputHelper output)
@@ -86,12 +86,42 @@ namespace eventcollector.tests
         }
 
         [Fact]
+        // case 3
         public async Task ShouldRejectNewEventWithLsnAlreadySeen()
         {
             var invariantTester = new SchedulerInVariantTester();
             var scheduler = new EventCollectorScheduler(invariantTester.OnSchedule);
             await scheduler.NewEvent(1);
             await Assert.ThrowsAsync<InvalidOperationException>(async () => await scheduler.NewEvent(1));
+        }
+
+        [Fact]
+        // case 4.a
+        public async Task SuccessReturnShouldCompleteTask()
+        {
+            var invariantTester = new SchedulerInVariantTester();
+            var scheduler = new EventCollectorScheduler(invariantTester.OnSchedule);
+            await scheduler.NewEvent(1);
+        }
+
+        [Fact]
+        // case 4.b
+        public async Task FirstSuccessShouldNotCompleteLaterTask()
+        {
+            var invariantTester = new SchedulerInVariantTester();
+            var scheduler = new EventCollectorScheduler(invariantTester.FirstSuccessOtherFailure);
+            var lsn = 1;
+            var t1 = scheduler.NewEvent(lsn++);
+            var t2 = t1;
+
+            while (t1 == t2)
+            {
+                t2 = scheduler.NewEvent(lsn++);
+                await Task.Delay(1);
+            }
+
+            await t1;
+            await Assert.ThrowsAnyAsync<Exception>(async () => await t2);
         }
     }
 
@@ -112,6 +142,15 @@ namespace eventcollector.tests
                 $"Seen event again for a lsn which is persisted : {this.persistTillLsn} >= {lsn}");
             this.persistTillLsn = lsn;
             await this.OnSchedule(lsn);
+        }
+
+        public async Task FirstSuccessOtherFailure(long lsn)
+        {
+            if (persistTillLsn > long.MinValue)
+            {
+                throw new Exception("Network exception");
+            }
+            await this.OnScheduleWithLsn(lsn);
         }
 
         public async Task OnScheduleWithSomeFailure(long lsn)
@@ -152,6 +191,7 @@ namespace eventcollector.tests
             // we got an event with lsn >= failed_lsn after failed_lsn.
             return this.lsnSucceeded.Any(ls => this.lsnFailed.Any(lf => lf <= ls));
         }
+
 
         long numConcurrentCalls = 0;
         long persistTillLsn = long.MinValue;
