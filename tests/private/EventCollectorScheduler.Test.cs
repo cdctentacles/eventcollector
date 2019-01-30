@@ -194,9 +194,12 @@ namespace eventcollector.tests
                 return true;
             }
 
-            // any Lsn in success with smaller lsn in failed ones mean that
-            // we got an event with lsn >= failed_lsn after failed_lsn.
-            return this.lsnSucceeded.Any(ls => this.lsnFailed.Any(lf => lf <= ls));
+            // If there is a lsn in success list which is greater than anyone of failed lsn,
+            // then we are good.
+            // Or
+            // we had no success after failed lsn.
+            return this.lsnSucceeded.Any(ls => this.lsnFailed.Any(lf => lf <= ls)) ||
+                this.lsnSucceeded.All(ls => this.lsnFailed.Any(lf => lf > ls));
         }
 
         public long PersistTillLsn
