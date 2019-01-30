@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace CDC.EventCollector
 {
-    class EventCollectorScheduler : IEventCollectorScheduler
+    class EventCollectorScheduler
     {
         public EventCollectorScheduler(Func<long, Task> onSchedule)
         {

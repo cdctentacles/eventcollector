@@ -12,7 +12,6 @@
     <Compile Include="EventCollectorScheduler.cs" />
     <Compile Include="Friends.cs" />
     <Compile Include="IEventCollector.cs" />
-    <Compile Include="IEventCollectorScheduler.cs" />
     <Compile Include="IHealthStore.cs" />
     <Compile Include="IPersistentCollector.cs" />
     <Compile Include="ISource.cs" />
