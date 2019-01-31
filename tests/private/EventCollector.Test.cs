@@ -50,5 +50,7 @@ namespace eventcollector.tests
             Assert.Equal(1, changes[0].Transactions[0].Lsn);
             Assert.Equal(2, changes[0].Transactions[1].Lsn);
         }
+
+        // What happens if we get lsn again if customer wants to retry it on failure.
     }
 }
