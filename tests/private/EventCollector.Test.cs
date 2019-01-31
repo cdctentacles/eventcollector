@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 using CDC.EventCollector;
 using Xunit;
 
@@ -19,6 +23,32 @@ namespace eventcollector.tests
         [Fact]
         public void Test1()
         {
+        }
+
+        [Fact]
+        // case 5
+        public async Task FailedTransactionWillBeRetriedOnNewEvent()
+        {
+            var persistentCollector = new TestPersistentCollectorFailure();
+            var persistentCollectors = new List<IPersistentCollector>() { persistentCollector };
+            var eventCollector = new EventCollector(persistentCollectors);
+            var partitionId = new Guid();
+            var data = new byte[] {0x1, 0x2};
+
+            persistentCollector.DontAcceptChangesNow();
+
+            await Assert.ThrowsAnyAsync<Exception>(async () =>
+                await eventCollector.TransactionApplied(partitionId, 1, data));
+
+            persistentCollector.AcceptChangesNow();
+
+            await eventCollector.TransactionApplied(partitionId, 2, data);
+            var changes = persistentCollector.Changes;
+
+            Assert.True(1 == changes.Count);
+            Assert.Equal(2, changes[0].Transactions.Count);
+            Assert.Equal(1, changes[0].Transactions[0].Lsn);
+            Assert.Equal(2, changes[0].Transactions[1].Lsn);
         }
     }
 }

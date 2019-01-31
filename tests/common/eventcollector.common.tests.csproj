@@ -11,6 +11,7 @@
     <Compile Include="TestEventSourceFactory.cs" />
     <Compile Include="TestHealthStore.cs" />
     <Compile Include="TestPersistentCollector.cs" />
+    <Compile Include="TestPersistentCollectorFailure.cs" />
     <Compile Include="XunitConsoleWriter.cs" />
   </ItemGroup>
 
