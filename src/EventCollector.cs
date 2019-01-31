@@ -22,7 +22,7 @@ namespace CDC.EventCollector
             return this.scheduler.NewEvent(lsn);
         }
 
-        public async Task PersistEvents(long persistTillLsn)
+        async Task PersistEvents(long persistTillLsn)
         {
             var transactions = this.queue.GetTransactions(persistTillLsn);
             var partitionChange = new PartitionChange(new Guid(), transactions);

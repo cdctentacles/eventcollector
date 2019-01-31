@@ -35,3 +35,4 @@ FOR /L %N IN () DO dotnet test --no-build --filter "FullyQualifiedName~OneAddAnd
 * Done : Make multi threaded implementation test.
 * Done : Pass multi threaded implementation.
 * Pass ContinuationToken in the APIs.
+* Pass previousLsn in TransactionApplied API.
