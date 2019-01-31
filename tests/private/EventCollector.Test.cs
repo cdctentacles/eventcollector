@@ -120,7 +120,6 @@ namespace eventcollector.tests
             Task.WaitAll(new Task[] { randomPCFailureFunc(), addEvents() });
             persistentCollector.AcceptChangesNow();
             await eventCollector.TransactionApplied(partitionId, lsn, this.Data);
-            await Task.Delay(40); // let the scheduler complete. hack ?
 
             var changes = persistentCollector.Changes;
             var allTransactions = changes.SelectMany((pc) => pc.Transactions).ToList();

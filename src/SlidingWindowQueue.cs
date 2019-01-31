@@ -68,6 +68,8 @@ namespace CDC.EventCollector
             return this.queue.TakeWhile(transaction => transaction.Lsn <= lsn).ToList().AsReadOnly();
         }
 
+        // no lock for lsnSeen, as this is read/written by only one function
+        // called on single thread.
         private long lsnSeen;
         ConcurrentQueue<TransactionData> queue;
     }
