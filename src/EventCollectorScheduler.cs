@@ -11,6 +11,7 @@ namespace CDC.EventCollector
             this.lockScheduler = new object();
             this.source = new TaskCompletionSource<bool>();
             this.waitingTillId = long.MinValue;
+            this.triedTillId = this.waitingTillId;
             this.Ready = onSchedule;
             this.timer = new Timer(this.OnEvent, null, TimeSpan.Zero, Timeout.InfiniteTimeSpan);
         }
