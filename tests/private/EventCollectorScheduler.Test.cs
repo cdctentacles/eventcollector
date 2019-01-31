@@ -163,7 +163,7 @@ namespace eventcollector.tests
         public async Task OnScheduleWithSomeFailure(long lsn)
         {
             // 30 % chance of failure.
-            if (this.rand.Next(1, 10) >= 3)
+            if (this.rand.Next(0, 10) >= 3)
             {
                 this.lsnSucceeded.Add(lsn);
                 await this.OnScheduleWithLsn(lsn);

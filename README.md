@@ -11,12 +11,8 @@ powershell ./build_tests.ps1
 3. It pushes events out to target plugin.
 4. It retries on transient failures.
 5. It uses Ihealthstore to emit warnings / errors.
-
-Think about APIs :
-1. TransactionApplied<T>(LSN, T change)
-    Serialize the change and send over wire.
-2. TransactionApplied(LSN, byte [] change)
-    Serialize yourself.
+6. If PersistentCollector fails to persist the events, we don't retry again.
+   Retry of older transactions happen with (and only with) arrival of new events.
 
 ## VSCode usage:
 1. Run Task :
@@ -35,6 +31,7 @@ FOR /L %N IN () DO dotnet test --no-build --filter "FullyQualifiedName~OneAddAnd
 
 ## Todo:
 * Done : Have only one source in EventCollector.
-* Write few basic private test for each class.
-* Make multi threaded implementation test.
-* Pass multi threaded implementation.
+* Done : Write few basic private test for each class.
+* Done : Make multi threaded implementation test.
+* Done : Pass multi threaded implementation.
+* Pass ContinuationToken in the APIs.

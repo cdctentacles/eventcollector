@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 using CDC.EventCollector;
@@ -18,7 +20,7 @@ namespace eventcollector.tests
     // 4. PC should not receive same transaction again if it returns success for that.
     // 5. If PC returns failure for T1, then we should receive T1 again and
     //    not receive a partition-change with T only > T1.
-    // 6. Failure cases should be re-tried again.
+    // 6. Failure cases should be re-tried again. Same as 5.
     //    No test : Automatically handled by new incoming events.
     // 7. This all should work with source sending Transactions one by one and
     //    scheduler running in background with re tries happening via new incoming events.
@@ -47,7 +49,7 @@ namespace eventcollector.tests
         }
 
         [Fact]
-        // case 5
+        // case 5 or 6.
         public async Task FailedTransactionWillBeRetriedOnNewEvent()
         {
             var persistentCollector = new TestPersistentCollectorFailure();
@@ -71,7 +73,64 @@ namespace eventcollector.tests
             Assert.Equal(2, changes[0].Transactions[1].Lsn);
         }
 
-        // What happens if we get lsn again if customer wants to retry it on failure.
+        [Fact]
+        // case 7 and more :)
+        public async Task RandomizedRealWorldTest()
+        {
+            var persistentCollector = new TestPersistentCollectorFailure();
+            var persistentCollectors = new List<IPersistentCollector>() { persistentCollector };
+            var eventCollector = new EventCollector(persistentCollectors);
+            var partitionId = new Guid();
+            var rand = new Random();
+            const int MaxTimeToWaitInMs = 1000 * 20; // 20 seconds of test
+
+            Func<Task> randomPCFailureFunc = async () => {
+                var watch = Stopwatch.StartNew();
+                while (watch.ElapsedMilliseconds < MaxTimeToWaitInMs)
+                {
+                    if (rand.Next(0, 10) < 3) // fail upload 30% time.
+                    {
+                        persistentCollector.DontAcceptChangesNow();
+                    }
+                    else
+                    {
+                        persistentCollector.AcceptChangesNow();
+                    }
+                    await Task.Delay(rand.Next(3, 20));
+                }
+            };
+
+            var lsnTaskDict = new Dictionary<long, Task>();
+            var lsn = 0;
+
+            Func<Task> addEvents = async () => {
+                var watch = Stopwatch.StartNew();
+                while (watch.ElapsedMilliseconds < MaxTimeToWaitInMs)
+                {
+                    var t = eventCollector.TransactionApplied(partitionId, lsn, this.Data);
+                    lsnTaskDict.Add(lsn, t);
+                    lsn += 1;
+                    if (rand.Next(0, 10) < 4) // sleep 40% time.
+                    {
+                        await Task.Delay(rand.Next(0, 10));
+                    }
+                }
+            };
+
+            Task.WaitAll(new Task[] { randomPCFailureFunc(), addEvents() });
+            persistentCollector.AcceptChangesNow();
+            await eventCollector.TransactionApplied(partitionId, lsn, this.Data);
+            await Task.Delay(40); // let the scheduler complete. hack ?
+
+            var changes = persistentCollector.Changes;
+            var allTransactions = changes.SelectMany((pc) => pc.Transactions).ToList();
+            var monotinicallyIncreasingLsns = allTransactions.Zip(allTransactions.Skip(1), (t1, t2) => t1.Lsn + 1 == t2.Lsn)
+                .All(b => b == true);
+            Assert.True(monotinicallyIncreasingLsns, "Some transaction is lost.");
+            Assert.True(allTransactions[0].Lsn == 0, "First lsn is not right");
+            Assert.True(allTransactions.Last().Lsn == lsn, "Last lsn is not right");
+        }
+
         readonly byte[] Data;
     }
 }

@@ -87,7 +87,7 @@ namespace eventcollector.tests
                     }
 
                     // Console.WriteLine($"Added total : {numTransactionsAddedLocal + transactionsAdded}");
-                    await Task.Delay(rand.Next(1, 10));
+                    await Task.Delay(rand.Next(0, 10));
                 }
             });
 
@@ -120,7 +120,7 @@ namespace eventcollector.tests
                         Assert.Equal(this.Data, transaction.Data);
                     }
 
-                    await Task.Delay(rand.Next(1, 10));
+                    await Task.Delay(rand.Next(0, 10));
                 }
             });
 
@@ -152,7 +152,7 @@ namespace eventcollector.tests
                         queue.Add(numTransactions + i, this.Data);
                     }
                     Interlocked.Exchange(ref numTotalTransactionsAdded, numTransactions + transactionsToAdd);
-                    await Task.Delay(rand.Next(1, 2));
+                    await Task.Delay(rand.Next(0, 2));
                 }
             };
 
@@ -172,7 +172,7 @@ namespace eventcollector.tests
                             break;
                         }
                     }
-                    await Task.Delay(rand.Next(1, 10));
+                    await Task.Delay(rand.Next(0, 10));
                 }
             };
 
