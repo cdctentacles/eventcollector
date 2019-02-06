@@ -18,11 +18,6 @@ namespace eventcollector.tests
             return this.Id;
         }
 
-        public override ITransactionalLog GetTransactionalLog()
-        {
-            return null;
-        }
-
         public IEventCollector Collector
         {
             get { return this.collector; }

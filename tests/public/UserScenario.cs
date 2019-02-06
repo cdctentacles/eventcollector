@@ -35,7 +35,7 @@ namespace eventcollector.tests
             var eventSource = testSourceFactory.EventSource;
             var transactionBytes = Encoding.ASCII.GetBytes("{}");
             var transactionLSN = 1;
-            await eventSource.OnTransactionApplied(transactionLSN, transactionBytes);
+            await eventSource.OnTransactionApplied(transactionLSN - 1, transactionLSN, transactionBytes);
 
             Assert.Single(persistentCollector.Changes);
             var persistedEvent = persistentCollector.Changes[0];
@@ -65,7 +65,7 @@ namespace eventcollector.tests
             var totalTaransactions = 1000;
             for (var lsn = 1; lsn <= totalTaransactions; ++lsn)
             {
-                transactionTasks.Add(eventSource.OnTransactionApplied(lsn, transactionBytes));
+                transactionTasks.Add(eventSource.OnTransactionApplied(lsn - 1, lsn, transactionBytes));
             }
 
             Task.WaitAll(transactionTasks.ToArray());

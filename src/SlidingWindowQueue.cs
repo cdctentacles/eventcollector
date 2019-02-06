@@ -13,14 +13,14 @@ namespace CDC.EventCollector
             this.lsnSeen = long.MinValue;
         }
 
-        public void Add(long lsn, byte [] data)
+        public void Add(TransactionData transaction)
         {
-            if (this.lsnSeen >= lsn)
+            if (this.lsnSeen >= transaction.Lsn)
             {
-                throw new ArgumentException($"LSN not in order. Received {lsn} when we have seen {this.lsnSeen}");
+                throw new ArgumentException($"LSN not in order. Received {transaction.Lsn} when we have seen {this.lsnSeen}");
             }
-            this.queue.Enqueue(new TransactionData(lsn, data));
-            this.lsnSeen = lsn;
+            this.queue.Enqueue(transaction);
+            this.lsnSeen = transaction.Lsn;
         }
 
         public int SlideWindowTill(long lsn)

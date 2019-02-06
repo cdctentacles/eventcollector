@@ -40,12 +40,14 @@ namespace eventcollector.tests
             var eventcollector = new EventCollector(persistentCollectors);
             var partitionId = new Guid();
 
-            await eventcollector.TransactionApplied(partitionId, 1, this.Data);
-            await eventcollector.TransactionApplied(partitionId, 2, this.Data);
+            await eventcollector.TransactionApplied(partitionId, 0, 1, this.Data);
+            await eventcollector.TransactionApplied(partitionId, 1, 2, this.Data);
 
             Assert.Equal(2, persistentCollector.Changes.Count);
             Assert.Equal(1, persistentCollector.Changes[0].Transactions[0].Lsn);
+            Assert.Equal(0, persistentCollector.Changes[0].Transactions[0].PreviousLsn);
             Assert.Equal(2, persistentCollector.Changes[1].Transactions[0].Lsn);
+            Assert.Equal(1, persistentCollector.Changes[1].Transactions[0].PreviousLsn);
         }
 
         [Fact]
@@ -60,11 +62,11 @@ namespace eventcollector.tests
             persistentCollector.DontAcceptChangesNow();
 
             await Assert.ThrowsAnyAsync<Exception>(async () =>
-                await eventCollector.TransactionApplied(partitionId, 1, this.Data));
+                await eventCollector.TransactionApplied(partitionId, 0, 1, this.Data));
 
             persistentCollector.AcceptChangesNow();
 
-            await eventCollector.TransactionApplied(partitionId, 2, this.Data);
+            await eventCollector.TransactionApplied(partitionId, 1, 2, this.Data);
             var changes = persistentCollector.Changes;
 
             Assert.True(1 == changes.Count);
@@ -107,7 +109,7 @@ namespace eventcollector.tests
                 var watch = Stopwatch.StartNew();
                 while (watch.ElapsedMilliseconds < MaxTimeToWaitInMs)
                 {
-                    var t = eventCollector.TransactionApplied(partitionId, lsn, this.Data);
+                    var t = eventCollector.TransactionApplied(partitionId, lsn - 1, lsn, this.Data);
                     lsnTaskDict.Add(lsn, t);
                     lsn += 1;
                     if (rand.Next(0, 10) < 4) // sleep 40% time.
@@ -119,7 +121,7 @@ namespace eventcollector.tests
 
             Task.WaitAll(new Task[] { randomPCFailureFunc(), addEvents() });
             persistentCollector.AcceptChangesNow();
-            await eventCollector.TransactionApplied(partitionId, lsn, this.Data);
+            await eventCollector.TransactionApplied(partitionId, lsn - 1, lsn, this.Data);
 
             var changes = persistentCollector.Changes;
             var allTransactions = changes.SelectMany((pc) => pc.Transactions).ToList();

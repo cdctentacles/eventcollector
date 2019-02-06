@@ -16,9 +16,9 @@ namespace CDC.EventCollector
             this.scheduler = new EventCollectorScheduler(this.PersistEvents);
         }
 
-        public Task TransactionApplied(Guid partitionId, long lsn, byte [] transaction)
+        public Task TransactionApplied(Guid partitionId, long previousLsn, long lsn, byte [] transaction)
         {
-            this.queue.Add(lsn, transaction);
+            this.queue.Add(new TransactionData(previousLsn, lsn, transaction));
             return this.scheduler.NewEvent(lsn);
         }
 

@@ -9,21 +9,17 @@ namespace CDC.EventCollector
         {
             this.eventCollector = eventCollector;
             this.healthStore = healthStore;
-            this.transactionalLog = this.GetTransactionalLog();
         }
 
         // return error type
-        public async Task OnTransactionApplied(long lsn, byte [] transaction)
+        public async Task OnTransactionApplied(long previousLsn, long lsn, byte [] transaction)
         {
-            await this.eventCollector.TransactionApplied(GetSourceId(), lsn, transaction);
+            await this.eventCollector.TransactionApplied(GetSourceId(), previousLsn, lsn, transaction);
         }
-
-        public abstract ITransactionalLog GetTransactionalLog();
 
         public abstract Guid GetSourceId();
 
         private IEventCollector eventCollector;
         private IHealthStore healthStore;
-        private ITransactionalLog transactionalLog;
     }
 }

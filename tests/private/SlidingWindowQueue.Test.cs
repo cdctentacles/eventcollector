@@ -82,7 +82,8 @@ namespace eventcollector.tests
                     int transactionsAdded = rand.Next(100, 1000);
                     for (int i = 1; i <= transactionsAdded; ++i)
                     {
-                        queue.Add(numTransactionsAddedLocal + i, this.Data);
+                        var lsn = numTransactionsAddedLocal + i;
+                        queue.Add(new TransactionData(lsn - 1, lsn, this.Data));
                         Interlocked.Increment(ref numTotalTransactionsAdded);
                     }
 
@@ -149,7 +150,8 @@ namespace eventcollector.tests
                     int transactionsToAdd = rand.Next(100, 1000);
                     for (int i = 1; i <= transactionsToAdd; ++i)
                     {
-                        queue.Add(numTransactions + i, this.Data);
+                        var lsn = numTransactions + i;
+                        queue.Add(new TransactionData(lsn - 1, lsn, this.Data));
                     }
                     Interlocked.Exchange(ref numTotalTransactionsAdded, numTransactions + transactionsToAdd);
                     await Task.Delay(rand.Next(0, 2));
@@ -205,11 +207,11 @@ namespace eventcollector.tests
         public void QueueSemantics()
         {
             var queue = new SlidingWindowQueue();
-            queue.Add(0, this.Data);
-            Assert.ThrowsAny<ArgumentException>(() => queue.Add(0, this.Data));
-            Assert.ThrowsAny<ArgumentException>(() => queue.Add(-1, this.Data));
-            queue.Add(1, this.Data);
-            Assert.ThrowsAny<ArgumentException>(() => queue.Add(0, this.Data));
+            queue.Add(new TransactionData(-1, 0, this.Data));
+            Assert.ThrowsAny<ArgumentException>(() => queue.Add(new TransactionData(-1, 0, this.Data)));
+            Assert.ThrowsAny<ArgumentException>(() => queue.Add(new TransactionData(-2, -1, this.Data)));
+            queue.Add(new TransactionData(0, 1, this.Data));
+            Assert.ThrowsAny<ArgumentException>(() => queue.Add(new TransactionData(-1, 0, this.Data)));
         }
 
         private SlidingWindowQueue GenerateQueueWithData(int numTransactions)
@@ -217,7 +219,7 @@ namespace eventcollector.tests
             var queue = new SlidingWindowQueue();
             for (int i = 0; i < numTransactions; ++i)
             {
-                queue.Add(i, this.Data);
+                queue.Add(new TransactionData(i-1, i, this.Data));
             }
             return queue;
         }

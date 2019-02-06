@@ -4,10 +4,16 @@ namespace CDC.EventCollector
 {
     public class TransactionData
     {
-        public TransactionData(long lsn, byte[] data)
+        public TransactionData(long previousLsn, long lsn, byte[] data)
         {
+            this.previousLsn = previousLsn;
             this.lsn = lsn;
             this.data = data;
+        }
+
+        public long PreviousLsn
+        {
+            get { return this.previousLsn; }
         }
 
         public long Lsn
@@ -19,6 +25,8 @@ namespace CDC.EventCollector
         {
             get { return this.data; }
         }
+
+        readonly long previousLsn;
         readonly long lsn;
         readonly byte[] data;
     }
