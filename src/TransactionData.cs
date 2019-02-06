@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace CDC.EventCollector
@@ -6,6 +7,11 @@ namespace CDC.EventCollector
     {
         public TransactionData(long previousLsn, long lsn, byte[] data)
         {
+            if (previousLsn >= lsn)
+            {
+                throw new ArgumentException($"PreviousLsn {previousLsn} can't be greater than or equal to Lsn {lsn}");
+            }
+
             this.previousLsn = previousLsn;
             this.lsn = lsn;
             this.data = data;
