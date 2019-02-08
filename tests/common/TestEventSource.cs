@@ -6,10 +6,10 @@ namespace eventcollector.tests
 {
     public class TestEventSource : Source
     {
-        public TestEventSource(IEventCollector collector, IHealthStore healthStore) :
+        public TestEventSource(IEventCollector collector, IHealthStore healthStore, Guid id = new Guid()) :
         base(collector, healthStore)
         {
-            this.Id = new Guid();
+            this.Id = id;
             this.collector = collector;
         }
 

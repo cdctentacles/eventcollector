@@ -63,10 +63,18 @@ namespace eventcollector.tests
             var transactionBytes = Encoding.ASCII.GetBytes("{}");
             var transactionTasks = new List<Task>();
             var totalTaransactions = 1000;
+            Task lastTask = null;
             for (var lsn = 1; lsn <= totalTaransactions; ++lsn)
             {
-                transactionTasks.Add(eventSource.OnTransactionApplied(lsn - 1, lsn, transactionBytes));
+                var task = eventSource.OnTransactionApplied(lsn - 1, lsn, transactionBytes);
+                if (task != lastTask)
+                {
+                    transactionTasks.Add(task);
+                }
+                lastTask = task;
             }
+
+            Assert.True(transactionTasks.Count < 3, "Creating unnecessary task objects.");
 
             Task.WaitAll(transactionTasks.ToArray());
 

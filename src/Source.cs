@@ -12,9 +12,9 @@ namespace CDC.EventCollector
         }
 
         // return error type
-        public async Task OnTransactionApplied(long previousLsn, long lsn, byte [] transaction)
+        public Task OnTransactionApplied(long previousLsn, long lsn, byte [] transaction)
         {
-            await this.eventCollector.TransactionApplied(GetSourceId(), previousLsn, lsn, transaction);
+            return this.eventCollector.TransactionApplied(GetSourceId(), previousLsn, lsn, transaction);
         }
 
         public abstract Guid GetSourceId();
